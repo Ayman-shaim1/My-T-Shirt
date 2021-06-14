@@ -1,0 +1,55 @@
+﻿@model My_T_Shirt.Models.Marque
+@{
+    ViewBag.Title = "Ajouter Marque";
+    Layout = "~/Views/Shared/_Layout_Admin.cshtml";
+}
+<style>
+    label.error {
+        color: var(--danger);
+        margin-top: 3px;
+    }
+</style>
+<div class="container">
+    <div class="pl-5 pr-5 m-5">
+        @if (ViewBag.error != "")
+        {
+            <div class="alert alert-dismissible alert-danger">
+                <p>@ViewBag.error</p>
+
+            </div>
+        }
+        @using (Html.BeginForm("AjouterMarque", "Admin", FormMethod.Post, new { id = "frmAjouter" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="form-group">
+                <label>Marque</label>
+                @Html.TextBoxFor(m => m.Nom, new { @class = "form-control", })
+            </div>
+            <button class="btn btn-primary btn-block">
+                ajouter
+            </button>
+        }
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#frmAjouter").validate({
+                rules: {
+                    Nom: {
+                        required: true
+                    },
+
+                },
+                messages: {
+                    Nom: {
+                        required: "il faut saisire le nom "
+                    },
+                }
+            });
+        });
+    </script>
+}
+

@@ -1,0 +1,246 @@
+﻿@model My_T_Shirt.ViewModel.ValiderCommande
+@{
+    ViewBag.Title = "Valider commade";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    label.error {
+        color: var(--danger);
+        margin-top: 3px;
+    }
+
+    .track-line {
+        height: 2px !important;
+        background-color: var(--primary);
+    }
+
+        .track-line.nn-track-line {
+            background-color: #f4f4f4;
+        }
+
+    .dot {
+        height: 35px;
+        width: 35px;
+        margin-left: 0px;
+        margin-right: 0px;
+        margin-top: 0px;
+        background-color: var(--primary);
+        border-radius: 50%;
+        display: inline-block;
+        position: relative
+    }
+
+    .-dot i {
+        font-size: 12px
+    }
+
+    .dot small {
+        position: absolute;
+        color: gray;
+        margin-top: 10px;
+        top: 100%;
+        width: 100%;
+    }
+
+    .dot.nn-dot {
+        background-color: #f4f4f4;
+    }
+</style>
+
+<div class="container">
+
+    <div class="row mb-5 mt-5">
+        <div class="col-md-12 mb-5">
+
+            <div class="d-flex flex-row justify-content-between align-items-center align-content-center">
+                <span class="dot d-flex justify-content-center align-items-center">
+                    <i class="fa fa-check text-white"></i>
+                    <small>S'identifier</small>
+                </span>
+                <hr class="flex-fill track-line">
+                <span class="dot d-flex justify-content-center align-items-center">
+                    <i class="fa fa-check text-white"></i>
+                    <small>adresse commande</small>
+                </span>
+                <hr class="flex-fill track-line ">
+                <span class="dot d-flex justify-content-center align-items-center nn-dot">
+                    <small>Valider la commande</small>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <hr class="mt-5" />
+
+    <div class="row">
+        <div class="col-xl-8 col-lg-8 col-md-8 col-sm-12">
+            <div>
+                <div class="justify-content-center d-flex">
+                    <h3 class="m-title mt-2 mb-3">Adresse commande</h3>
+                </div>
+                <div class="">
+                    <table class="table">
+                        <tr>
+                            <th>Pays :</th>
+                            <td>@Model.adresse.pays</td>
+                        </tr>
+                        <tr>
+                            <th>Ville :</th>
+                            <td>@Model.adresse.ville</td>
+                        </tr>
+                        <tr>
+                            <th>@Model.adresse.codePostal</th>
+                            <td>01010</td>
+                        </tr>
+                    </table>
+                    <table class="table">
+                        <tr>
+                            <td colspan="2">
+                                <div class="justify-content-center d-flex">
+                                    <h6 class="">Adresse</h6>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">@Model.adresse.adresse</td>
+                        </tr>
+                    </table>
+                </div>
+                <hr />
+            </div>
+            <div>
+                <div class="justify-content-center d-flex mt-4 mb-4">
+                    <h3 class="m-title">Produits</h3>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Nom</th>
+                                <th>quantite</th>
+                                <th>taille choisie</th>
+                                <th>prix</th>
+                                <th>total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var produit in Model.produits)
+                            {
+                                <tr>
+                                    <td><a href="/DetailsProduit?idProduit=@produit.idProduit"><img src="@produit.Image" class="img-thumbnail" style="width:60px" /></a></td>
+                                    <td>@produit.Nom</td>
+                                    <td>@produit.qte</td>
+                                    <td>@My_T_Shirt.Models.Taille.getNom(produit.idTaille)</td>
+                                    <td>@produit.prix MAD</td>
+                                    <td>@(produit.prix * produit.qte) MAD</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <div class="justify-content-between d-flex">
+                        <label>Nombre de produits :</label>
+                        <label id="lbl-nbrProd">0</label>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <div class="justify-content-between d-flex">
+                        <label>Montant Total :</label>
+                        <label><span id="lbl-Mt">100</span> MAD</label>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <div class="alert alert-info mb-0">
+                        <div class="justify-content-center d-flex p-0 ">
+                            <h4 class="mt-1">Livraison gratuit</h4>
+                        </div>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <button class=" btn btn-primary btn-block" id="btn-valider-commande">
+                        valider la commande
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            const panier = JSON.parse(getCookie("Panier"));   
+            let nbr = 0;
+            let mt = 0;
+
+            $.each(panier, function (index,produit) {
+                nbr += produit.qte;
+                mt += produit.prix * produit.qte;
+            });
+
+            $("#lbl-nbrProd").text(nbr);
+            $("#lbl-Mt").text(mt);
+
+            $("#btn-valider-commande").on("click", function () {
+                Swal.fire({
+                    title: 'Confirmation',
+                    text: "Etes vous sure de vouloire valider cette commande",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: 'var(--primary)',
+                    cancelButtonColor: 'gray',
+                    confirmButtonText: 'oui valider la commande',
+                    showCancelButton :"non",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const dataToSend = {
+                            adresse: {
+                                adresse: "@Model.adresse.adresse",
+                                ville: "@Model.adresse.ville",
+                                codePostal: "@Model.adresse.codePostal",
+                                pays: "@Model.adresse.pays",
+                            },
+                            produits: [],
+                        };
+
+                        $.each(panier, function (index, produit) {
+                            const produit_panier = {
+                                idProduit: produit.idProduit,
+                                idTaille: produit.idTaille,
+                                qte: produit.qte
+                            }
+                            dataToSend.produits.push(produit_panier);
+                        });
+                        $.ajax({
+                            method: "post",
+                            url: "@Url.Action("","ValiderCommande")",
+                            contentType: "application/json",
+                            data: JSON.stringify(dataToSend),
+                            success: function (resp) {
+                                window.location.href = "/Commande?idCommande=" + resp.IdCommande;
+                            },
+                            error: function (resp) {
+                                console.log(resp);
+                                Swal.fire({
+                                    title: 'Alert',
+                                    text: resp.responseJSON.Message,
+                                    icon: 'error',
+                                    confirmButtonColor: 'var(--danger)',
+                                });
+                            }
+                        })
+                    }
+                })
+            })
+
+        });
+    </script>
+}

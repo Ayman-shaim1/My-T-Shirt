@@ -1,0 +1,152 @@
+﻿    @model PagedList.IPagedList<My_T_Shirt.Models.Produit>
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "Produits";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="jumbotron mt-5">
+        <h6 class="display-4 mb-3 justify-content-center d-flex">Nos Produits</h6>
+        <p class="lead">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Veritatis omnis quod cumque suscipit culpa explicabo laudantium animi veniam quo qui, recusandae vero nobis distinctio asperiores consequatur laboriosam, unde accusamus voluptatum.
+        </p>
+        <hr class="my-4">
+        <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Veritatis omnis quod cumque suscipit culpa explicabo laudantium animi veniam quo qui, recusandae vero nobis distinctio asperiores consequatur laboriosam, unde accusamus voluptatum.
+        </p>
+
+    </div>
+    <div class="row mt-5">
+        <div class="col-xl-8 col-lg-8 col-md-8 col-sm-12">
+            <a class="btn btn-light" href="/Produits" role="button">Réinitialiser</a>
+            <a class="btn btn-light" href="/Produits?genre=Homme" role="button">Homme</a>
+            <a class="btn btn-light" href="/Produits?genre=Femme" role="button">Femme</a>
+        </div>
+        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 mt-2">
+            @using (Html.BeginForm("", "Produits", new { genre = ViewBag.genre }, FormMethod.Get, null))
+            {
+                <div class="input-group">
+                    @Html.TextBox("recherche", ViewBag.recherche as string, new { @class = "form-control" ,@placeholder="Recherche ...", @autocomplete = "off" })
+                    <div class="input-group-append">
+                        <button class="btn btn-primary btn-sm" type="submit">
+                            <b> <i class="fas fa-search"></i></b>
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    <hr />
+    <div class="row mt-5">
+        @{
+            if (Model.Count == 0)
+            {
+                
+                    <div class="jumbotron jumbotron-fluid w-100  justify-content-center d-flex">
+                        <h1 class="display-4">rien n'est trouvé</h1>
+                    </div>
+
+            }
+                    else
+                    {
+                    foreach (var produit in Model)
+                    {
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-5">
+                        <div class="m-produit">
+                            <div class="m-produit-image-box">
+                                @if (My_T_Shirt.Models.Solde.inSolde(produit.IdProduit))
+                                {
+                                    <span class="badge badge-danger">Solde</span>
+                                }
+                                <img src="@produit.Image" class="img-thumbnail" />
+                                <a class="btn btn-primary w-75" href="/DetailsProduit?idProduit=@produit.IdProduit">Details</a>
+                            </div>
+                            <div class="m-produit-info mt-1">
+                                <h4 class="mb-0">@produit.Nom</h4>
+                                <div class="justify-content-between d-flex">
+                                    <small style="color:yellow">
+                                        @if (My_T_Shirt.Models.Review.getRating(produit.IdProduit) == 0)
+                                        {
+                                            <i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                                        }
+                                        else if (My_T_Shirt.Models.Review.getRating(produit.IdProduit) == 1)
+                                        {
+                                            <i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                                        }
+                                        else if (My_T_Shirt.Models.Review.getRating(produit.IdProduit) == 2)
+                                        {
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                                        }
+                                        else if (My_T_Shirt.Models.Review.getRating(produit.IdProduit) == 3)
+                                        {
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                                        }
+                                        else if (My_T_Shirt.Models.Review.getRating(produit.IdProduit) == 4)
+                                        {
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
+                                        }
+                                        else if (My_T_Shirt.Models.Review.getRating(produit.IdProduit) == 5)
+                                        {
+                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                        }
+
+
+                                    </small>
+                                    @if (!My_T_Shirt.Models.Solde.inSolde(produit.IdProduit))
+                                    {
+                                        <small>@produit.Prix MAD</small>
+                                    }
+                                    else
+                                    {
+                                        <div>
+                                            <small style="text-decoration:line-through">@produit.Prix MAD</small>
+                                            <small>@My_T_Shirt.Models.Solde.getPrixSolde(produit.IdProduit) MAD</small>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    }
+                    }
+                    }
+                </div>
+    <hr/>
+                <div class="justify-content-center d-flex">
+                    @Html.PagedListPager(Model, page =>
+                                                Url.Action("", new {
+                                                    page = page,
+                                                    recherche = ViewBag.recherche,
+                                                    genre = ViewBag.genre,
+
+                                                }),
+                                                new PagedListRenderOptions
+                                                {
+                                                    LiElementClasses = new string[] { "page-item" },
+                                                    UlElementClasses = new string[] { "pagination pagination-sm" },
+                                                    LinkToPreviousPageFormat = "precedent",
+                                                    LinkToNextPageFormat = "suivant",
+
+                                                })
+                </div>
+                <!--solde-->
+                <div class="mb-5">
+                    <div class="justify-content-center d-flex mt-5 mb-5">
+                        <h2 class="m-title">Produits en solde</h2>
+                    </div>
+                    <div>
+                        @{
+                            Html.RenderAction("RenderSoldeProduits", "Produits");
+                        }
+                    </div>
+                </div>
+                <!--solde-->
+            </div>
+@section scripts
+{
+    <script type="text/javascript">
+         $(".page-item").find("a").addClass("page-link");
+    </script>
+}
+

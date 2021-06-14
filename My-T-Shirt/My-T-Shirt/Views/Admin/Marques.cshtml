@@ -1,0 +1,113 @@
+﻿@model List<My_T_Shirt.Models.Marque>
+@{
+    ViewBag.Title = "Marques";
+    Layout = "~/Views/Shared/_Layout_Admin.cshtml";
+}
+
+<div class="container mt-5">
+
+    @if (Model.Count == 0)
+    {
+        <div class="jumbotron jumbotron-fluid">
+            <div class="justify-content-center d-flex">
+                <h4>Il n ya aucune marque</h4>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID marque</th>
+                        <th>Nom marque</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="t-body-marques">
+                    @foreach (var marque in Model)
+                    {
+                        <tr>
+                            <td>@marque.IdMarque</td>
+                            <td>@marque.Nom</td>
+                            <td>
+                                <div class="btn-group">
+                                    <button class="btn btn-danger btn-sm btn-supp" data-id="@marque.IdMarque"><i class="fas fa-trash-alt"></i></button>
+                                    <a class="btn btn-light btn-sm" href="/Admin/DetailsMarque?idMarque=@marque.IdMarque"><i class="fas fa-edit"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $(".btn-supp").on("click", function () {
+                var id = $(this).attr("data-id");
+                var parent = $(this).parent().parent().parent();
+
+                Swal.fire({
+                    title: 'Confirmation',
+                    text: "Etes vous sure de vouloire supprimer cette marque ?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: 'var(--primary)',
+                    cancelButtonColor: 'gray',
+                    confirmButtonText: 'oui',
+                    cancelButtonText: 'non'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        $.ajax({
+                            method: 'POST',
+                            url: '@Url.Action("SupprimerMarque","Admin")',
+                            data: JSON.stringify({
+                                idMarque:id,
+                            }),
+                            contentType: 'application/json',
+                            success: function (res) {
+                                console.log(res);
+                                Swal.fire({
+                                    title: 'Alert',
+                                    text: "Cette marque a ete supprimer avec success",
+                                    icon: 'success',
+                                    confirmButtonColor: 'var(--success)',
+
+                                });
+                                parent.remove();
+                                ($("#t-body-marques").find("tr").length == 0)
+                                {
+                                    var container = $("#t-body-marques").parent().parent();
+                                    $("#t-body-marques").parent().remove();
+                                    container.append(`<div class="jumbotron jumbotron-fluid">
+                                                        <div class="justify-content-center d-flex">
+                                                            <h4>Il n ya aucune marque</h4>
+                                                        </div>
+                                                    </div>`);
+                                }
+                            },
+                            error: function (res) {
+                                console.log(res);
+                                Swal.fire({
+                                    title: 'Alert',
+                                    text: res.responseJSON.Message,
+                                    icon: 'error',
+                                    confirmButtonColor: 'var(--danger)',
+                                });
+                            }
+                        });
+                    }
+
+                    });
+            });
+
+        });
+    </script>
+}

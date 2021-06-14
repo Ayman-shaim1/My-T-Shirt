@@ -1,0 +1,237 @@
+﻿@model List<My_T_Shirt.Models.Commande>
+@{
+    ViewBag.Title = "Profile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    label.error {
+        color: var(--danger);
+        margin-top: 3px;
+    }
+</style>
+
+<div class="container mt-5">
+    <h4>Utilistaeur : <span class="text-success">@My_T_Shirt.Helpers.Authentication.getEmail(false)</span></h4>
+    <hr />
+    <nav class="mt-5">
+        <div class="nav nav-tabs">
+            <a class="nav-link active" id="nav-mes-commandes-tab" data-toggle="tab" href="#mes-commandes" aria-controls="true">Mes commandes</a>
+            <a class="nav-link" id="nav-modfier-nom-prenom-tab" data-toggle="tab" href="#modifier-nom-prenom" aria-controls="false">Modifier nom / prenom</a>
+            <a class="nav-link" id="nav-modfier-mot-de-passe" data-toggle="tab" href="#modifier-mot-de-passe" aria-controls="false">Modifier mot de passe</a>
+        </div>
+    </nav>
+    <div class="tab-content">
+
+        <div class="tab-pane fade show active" id="mes-commandes" role="tabpanel" aria-labelledby="nav-mes-commandes-tab">
+            @if (Model.Count == 0)
+            {
+                <div class="jumbotron mt-5">
+                    <div class="justify-content-center d-flex">
+                        <h4>veuillez passer des commandes</h4>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive mt-5">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>ID commande</th>
+                                <th>Date commande</th>
+                                <th>Montant total</th>
+                                <th>Livré</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var commande in Model)
+                            {
+                                <tr>
+                                    <th>@commande.IdCommande</th>
+                                    <th>@commande.Date_Com</th>
+                                    <th>@My_T_Shirt.Models.Commande.getMontantTotal(commande.IdCommande) MAD</th>
+                                    <th>
+                                        @if (commande.isDelivered)
+                                        {
+                                            <span class="text-success">@DateTime.Parse(commande.Date_Livraison.ToString()).ToShortDateString()&nbsp;@DateTime.Parse(commande.Date_Livraison.ToString()).ToLongTimeString()</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger justify-content-center d-flex"><i class="fas fa-times"></i></span>
+                                        }
+                                    </th>
+                                    <th>
+                                        <a href="/Commande?idCommande=@commande.IdCommande" class="btn btn-secondary btn-sm">
+                                            details
+                                        </a>
+                                    </th>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        <div class="tab-pane fade" id="modifier-nom-prenom" role="tabpanel" aria-labelledby="nav-modfier-nom-prenom-tab">
+            <div class="mt-5" style="padding:0 20% 0 20%">
+                <form id="frmModNomPrenom">
+                    <div class="form-group">
+                        <label>Nom </label>
+                        <input type="text" class="form-control" value="@My_T_Shirt.Helpers.Authentication.getNom(false)" name="txt-nom" id="txt-nom" />
+                    </div>
+                    <div class="form-group">
+                        <label>Prenom </label>
+                        <input type="text" class="form-control" value="@My_T_Shirt.Helpers.Authentication.getPrenom(false)" name="txt-prenom" id="txt-prenom" />
+                    </div>
+                   
+                    <button class="btn btn-primary btn-block" type="submit">Modifier</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="modifier-mot-de-passe" role="tabpanel" aria-labelledby="nav-modfier-mot-de-passe">
+            <div class="mt-5" style="padding:0 20% 0 20%">
+                <form id="frmModMdp">
+                    <div class="form-group">
+                        <label>Mot de passe actuel </label>
+                        <input type="password" class="form-control" name="txt-mdp-actuel" id="txt-mdp-actuel" />
+                    </div>
+                    <div class="form-group">
+                        <label>Nouveau mot de passe </label>
+                        <input type="password" class="form-control" name="txt-new-mdp" id="txt-new-mdp" />
+                    </div>
+                    <div class="form-group">
+                        <label>Confirmer le nouveau mot de passe </label>
+                        <input type="password" class="form-control" name="txt-confirm-new-mdp" id="txt-confirm-new-mdp" />
+                    </div>
+                    <button class="btn btn-primary btn-block">Modifier</button>
+                  </form>
+            </div>
+        </div>
+        </div>
+ </div>
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $("#frmModNomPrenom").validate({
+                rules: {
+                    "txt-nom": {
+                        required: true,
+                    },
+                    "txt-prenom": {
+                        required: true,
+                    }
+   
+                },
+                messages: {
+                    "txt-nom": {
+                        required: "il faut saisire le nom",
+                    },
+                    "txt-prenom": {
+                        required: "il faut saisire le prenom",
+                    },
+                },
+                submitHandler: function () {
+
+                    const objToSend = {
+                        nom: $("#txt-nom").val(),
+                        prenom: $("#txt-prenom").val(),
+                    };
+                    
+                    $.ajax({
+                        method: "post",
+                        url: "@Url.Action("ModifierInfo", "MonCompte")",
+                        data: JSON.stringify(objToSend),
+                        contentType:"application/json",
+                        success: function (resp) {
+                            console.log(resp);
+                            $("#navbar-nom").text(objToSend.nom);
+                            $("#navbar-prenom").text(objToSend.prenom);
+
+                            Swal.fire({
+                                title: 'Alert',
+                                text: "Modification effectuee avec success",
+                                icon: "success",
+                                confirmButtonColor: 'var(--success)',
+                            });
+                        },
+                        error: function (resp) {
+                            console.log(resp);
+                        }
+                    });
+
+
+                }
+            });
+
+             $("#frmModMdp").validate({
+                rules: {
+                    "txt-mdp-actuel": {
+                        required:true,
+                    },
+                    "txt-new-mdp": {
+                        required: true,
+                        minlength:5,
+                    },
+                    "txt-confirm-new-mdp": {
+  
+                        equalTo: "#txt-new-mdp"
+                    },
+                 },
+                 messages: {
+                     "txt-mdp-actuel": {
+                         required: "il faut saisire le mot de passe actuel",
+                     },
+                     "txt-new-mdp": {
+                         required: "il faut saisire le nouveau mot de passe",
+                         minlength: "mot de passe faible !",
+                     },
+                     "txt-confirm-new-mdp": {
+                         equalTo: "Le mot de passe et le mot de passe de confirmation doivent être identiques !"
+                     },
+                 },
+                submitHandler: function () {
+                    const objToSend = {
+                        MotDePasseActuel: $("#txt-mdp-actuel").val(),
+                        NouveauMotDePasse: $("#txt-new-mdp").val(),
+                    };
+
+                    $.ajax({
+                        method: "post",
+                        url: "@Url.Action("ModfierMotDePasse", "MonCompte")",
+                        data: JSON.stringify(objToSend),
+                        contentType: "application/json",
+                        success: function (resp) {
+                            console.log(resp);
+
+                            Swal.fire({
+                                title: 'Alert',
+                                text: "Modification effectuee avec success",
+                                icon: "success",
+                                confirmButtonColor: 'var(--success)',
+                            });
+
+                            $("#txt-mdp-actuel").val("");
+                            $("#txt-new-mdp").val("");
+                            $("#txt-confirm-new-mdp").val("");
+
+                        },
+                        error: function (resp) {
+                         console.log(resp);
+                            Swal.fire({
+                                title: 'Alert',
+                                text: resp.responseJSON.Message,
+                                icon: "error",
+                                confirmButtonColor: 'var(--danger)',
+                            });
+                        }
+                    })
+                }
+            });
+        });
+    </script>
+}
+

@@ -1,0 +1,496 @@
+﻿@model My_T_Shirt.Models.Produit
+@{
+    ViewBag.Title = "Details Produit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var reviews = (List<My_T_Shirt.ViewModel.ShowReviews>)ViewData["reviews"];
+    var lstTailles = (List<My_T_Shirt.Models.Taille>)ViewData["tailles"];
+    var lstRelatedProducts = (List<My_T_Shirt.Models.Produit>)ViewData["relatedProducts"];
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-3">
+            <div class="img-box" style="position:relative">
+                @if (My_T_Shirt.Models.Solde.inSolde(Model.IdProduit))
+                {
+                    <span class="badge badge-danger" style="position:absolute;right:1%;top:1%;width:70px">solde</span>
+                }
+
+                <img class="img-thumbnail w-100 h-100" src="@Model.Image" />
+            </div>
+        </div>
+        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 " id="zz-info-product">
+            <ul class="list-group">
+                <li class="list-group-item"><span class="h5 text-dark">Nom :</span> @Model.Nom</li>
+                <li class="list-group-item"><span class="h5 text-dark">Marque :</span> @My_T_Shirt.Models.Marque.getNom(Model.idMarque)</li>
+                <li class="list-group-item"><span class="h5 text-dark">Genre :</span> @Model.Genre</li>
+                @if (!My_T_Shirt.Models.Solde.inSolde(Model.IdProduit))
+                {
+                    <li class="list-group-item"><span class="h5 text-dark">Prix :</span> <span id="prix"><span>@Model.Prix</span>  MAD</span></li>
+                }
+                else
+                {
+                    <li class="list-group-item">
+                        <span class="h5 text-dark">Prix :</span>
+                        <span style="text-decoration:line-through"><span>@Model.Prix</span>  MAD</span>
+                        <span id="prix"><span>@My_T_Shirt.Models.Solde.getPrixSolde(Model.IdProduit)</span> MAD</span>
+                    </li>
+                }
+            </ul>
+            <ul class="list-group mt-2">
+                <li class="list-group-item">@Model.Description</li>
+            </ul>
+
+            <div class="card mt-2">
+                <div class="card-body">
+                    <div class="justify-content-center d-flex">
+                        <h6 class="m-title mb-0">Choisire une taille</h6>
+                    </div>
+                    <hr />
+                    <div class="justify-content-center d-flex p-0">
+                        @foreach (var taille in lstTailles)
+                        {
+                            <div class="btn btn-light btn-taille ml-1 btn-sm " data-id="@taille.IdTaille">
+                                @taille.Nom
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!---->
+    @if (lstRelatedProducts.Count != 0)
+    {
+        <div class="mt-5 mb-5">
+            <div class="justify-content-center d-flex mb-3">
+                <h2 class="m-title">Produits liés à ce produits</h2>
+            </div>
+            <div>
+                <div class="solde-owl-carousel">
+                    @{
+                        foreach (var produit in lstRelatedProducts)
+                        {
+                            <div class="item">
+                                <div class="m-produit mb-5">
+                                    <div class="m-produit-image-box">
+                                        @if (My_T_Shirt.Models.Solde.inSolde(produit.IdProduit))
+                                        {
+                                            <span class="badge badge-danger">Solde</span>
+                                        }
+                                        <img src="@produit.Image" class="img-thumbnail" />
+                                        <a class="btn btn-primary w-75" href="/DetailsProduit?idProduit=@produit.IdProduit">Details</a>
+                                    </div>
+                                    <div class="m-produit-info mt-1">
+                                        <h4 class="mb-0">@produit.Nom</h4>
+                                        <div class="justify-content-between d-flex">
+                                            <small style="color:yellow">
+                                                @if (My_T_Shirt.Models.Review.getRating(produit.IdProduit) == 0)
+                                                {
+                                                    <i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                                                }
+                                                else if (My_T_Shirt.Models.Review.getRating(produit.IdProduit) == 1)
+                                                {
+                                                    <i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                                                }
+                                                else if (My_T_Shirt.Models.Review.getRating(produit.IdProduit) == 2)
+                                                {
+                                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                                                }
+                                                else if (My_T_Shirt.Models.Review.getRating(produit.IdProduit) == 3)
+                                                {
+                                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                                                }
+                                                else if (My_T_Shirt.Models.Review.getRating(produit.IdProduit) == 4)
+                                                {
+                                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
+                                                }
+                                                else if (My_T_Shirt.Models.Review.getRating(produit.IdProduit) == 5)
+                                                {
+                                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                                }
+                                            </small>
+                                            @if (!My_T_Shirt.Models.Solde.inSolde(produit.IdProduit))
+                                            {
+                                                <small>@produit.Prix MAD</small>
+                                            }
+                                            else
+                                            {
+                                                <div>
+                                                    <small style="text-decoration:line-through">@produit.Prix MAD</small>
+                                                    <small>@My_T_Shirt.Models.Solde.getPrixSolde(produit.IdProduit) MAD</small>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    <!---->
+
+    <div class="jumbotron jumbotron-fluid mt-3 mb-2">
+        <div class="container justify-content-center d-flex">
+            <h2 class="">Livraison gratuit</h2>
+        </div>
+    </div>
+
+    <div class="row mt-5 mb-3">
+
+        <div class="col-xl-8 col-lg-8 col-md-8 col-sm-12 mb-5" style="overflow-y:auto;height:400px">
+            <div class="justify-content-center d-flex mb-4 mt-1">
+                <h2 class="m-title">Reviews</h2>
+            </div>
+            <div id="reviews">
+                @foreach (var item in reviews)
+                {
+                    <div class="review p-1 border-bottom mb-3">
+                        <div class="justify-content-between d-flex">
+                            <h5>@item.Prenom @item.Nom</h5>
+                            <small>@item.dateReview.ToShortDateString()</small>
+                        </div>
+                        <p style="color:yellow">
+                            @if (item.Rating == 1)
+                            {
+                                <i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                            }
+                            else if (item.Rating == 2)
+                            {
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                            }
+                            else if (item.Rating == 3)
+                            {
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                            }
+                            else if (item.Rating == 4)
+                            {
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
+                            }
+                            else if (item.Rating == 5)
+                            {
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            }
+                        </p>
+                        <p>
+                            @item.Commentaire
+                        </p>
+
+                    </div>
+                }
+            </div>
+
+        </div>
+        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 mb-3">
+            @if (My_T_Shirt.Models.Review.inReview(Model.IdProduit, My_T_Shirt.Helpers.Authentication.getId(false)))
+            {
+                <div id="make-review">
+                    <h4 class="m-title justify-content-center d-flex">Votre avis sur ce produit</h4>
+
+                    <div class="form-group">
+                        <label>Rating</label>
+                        <select class="form-control" id="drp-rating">
+                            <option value="">--- selectionner ---</option>
+                            <option value="1"> 1</option>
+                            <option value="2"> 2</option>
+                            <option value="3"> 3</option>
+                            <option value="4"> 4</option>
+                            <option value="5"> 5</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Commentaire</label>
+                        <textarea class="form-control" placeholder="Ecrire un commentaire ..." id="txt-cmnt"></textarea>
+                    </div>
+                    <button class="btn btn-primary btn-block" id="btn-make-review">submit</button>
+                </div>
+
+            }
+        </div>
+    </div>
+
+    <!--solde-->
+    <div class="mb-5">
+        <div class="justify-content-center d-flex mt-5 mb-5">
+            <h2 class="m-title">Produits en solde</h2>
+        </div>
+        <div>
+            @{
+                Html.RenderAction("RenderSoldeProduits", "Produits");
+            }
+        </div>
+    </div>
+    <!--solde-->
+
+</div>
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var btnMakeReview = $("#btn-make-review");
+
+
+
+            $(".btn-taille").on("click", function () {
+                $(".btn-taille").removeClass("active");
+                $(this).addClass("active");
+                const idTaille = $(this).attr("data-id");
+                const idProduit = '@Model.IdProduit';
+
+                $.ajax({
+                    method: "POST",
+                    url: "@Url.Action("inPanier", "Panier")",
+                    data: JSON.stringify({
+                        idProduit,
+                        idTaille
+                    }),
+                    contentType: "application/json",
+                    success: function (resp) {
+                        console.log(resp);
+                        if (resp.existe) {
+                            $("#existe-in-cart-zn").remove();
+                            $("#zn-add-to-card").remove();
+                            $("#zn-qte-msg").remove();
+                            $("#zz-info-product").append(`<div class="card mt-2" id="existe-in-cart-zn">
+                                                <div class="card-body">
+                                                    <div class="alert alert-info">
+                                                        <div class="justify-content-center d-flex">
+                                                            <h5 class="mb-0">Deja ajouter</h5>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>`);
+
+                        } else {
+
+                            $.ajax({
+                                method: "POST",
+                                url: "@Url.Action("getTailleQteStock", "DetailsProduit")",
+                                data: JSON.stringify({
+                                    idProduit: '@Model.IdProduit',
+                                    idTaille: idTaille
+                                }),
+                                contentType: "application/json",
+                                success: function (resp) {
+                                    if (resp.qteStock != 0) {
+                                        let html_options = '';
+
+                                        for (i = 1; i <= resp.qteStock; i++) {
+                                            html_options += `<option value="${i}">${i}</option>`
+                                        }
+
+                                        console.log(resp);
+                                        $("#zn-add-to-card").remove();
+                                        $("#zn-qte-msg").remove();
+                                        $("#existe-in-cart-zn").remove();
+                                        $("#zz-info-product").append(`<ul class="list-group mt-2" id="zn-add-to-card">
+                                                        <li class="list-group-item">
+                                                            <select class="form-control" id="drp-qte">
+                                                                ${html_options}
+                                                            </select>
+                                                        </li>
+                                                        <li class="list-group-item">
+                                                            <button class="btn btn-block btn-primary" id="btn-add-to-card">
+                                                                Ajouter au panier
+                                                            </button>
+                                                        </li>
+                                                    </ul>`);
+                                        AddToCart();
+                                    }
+                                    else {
+                                        $("#zn-add-to-card").remove();
+                                        $("#zn-qte-msg").remove();
+                                        $("#existe-in-cart-zn").remove();
+
+                                        $("#zz-info-product").append(`<div class="card mt-2" id="zn-qte-msg">
+                                                            <div class="card-body">
+                                                                <div class="justify-content-center d-flex">
+                                                                    <p class="text-danger m-0">
+                                                                        out of stock
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>`);
+                                    }
+                                },
+                                error: function (resp) {
+                                    console.log(resp);
+                                    Swal.fire({
+                                        title: 'Alert',
+                                        text: resp.responseJSON.Message,
+                                        icon: "error",
+                                        confirmButtonColor: 'var(--danger)',
+                                    });
+                                }
+                            })
+                        }
+                    },
+                    error: function (resp) {
+                        console.log(resp);
+
+                        Swal.fire({
+                            title: 'Alert',
+                            text: resp.responseJSON.Message,
+                            icon: "error",
+                            confirmButtonColor: 'var(--danger)',
+                        });
+                    }
+                })
+
+
+
+
+            });
+
+            function AddToCart() {
+                $("#btn-add-to-card").on("click", function () {
+
+
+
+                    const r_prix = '@My_T_Shirt.Models.Solde.getPrixSolde(Model.IdProduit)';
+                    const prix = parseFloat(r_prix.split(",")[0] + "." + r_prix.split(",")[1]);
+
+                    const objToSend = {
+                        idProduit: '@Model.IdProduit',
+                        idTaille: $(".btn-taille.active").attr("data-id"),
+                        Image: "@Model.Image",
+                        Nom: '@Model.Nom',
+                        qte: $("#drp-qte").val(),
+                        prix: prix,
+                    };
+
+                    $.ajax({
+                        method: "POST",
+                        url: "@Url.Action("AjouterAuPanier", "Panier")",
+                        data: JSON.stringify(objToSend),
+                        contentType: 'application/json',
+                        success: function (resp) {
+                            console.log(resp);
+                            $("#existe-in-cart-zn").remove();
+                            $("#zn-add-to-card").remove();
+                            $("#zn-qte-msg").remove();
+                            $("#zz-info-product").append(`<div class="card mt-2" id="existe-in-cart-zn">
+                                                            <div class="card-body">
+                                                                <div class="alert alert-info">
+                                                                    <div class="justify-content-center d-flex">
+                                                                        <h5 class="mb-0">Deja ajouter</h5>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>`);
+                            Swal.fire({
+                                title: 'Alert',
+                                text: "Ce produit a été ajouté avec succès à votre panier",
+                                icon: "success",
+                                confirmButtonColor: 'var(--success)',
+                            });
+                        },
+                        error: function (resp) {
+                            console.log(resp);
+                            Swal.fire({
+                                title: 'Alert',
+                                text: resp.responseJSON.Message,
+                                icon: "error",
+                                confirmButtonColor: 'var(--danger)',
+                            });
+                        }
+                    })
+                });
+            }
+
+
+            if (btnMakeReview) {
+                btnMakeReview.on("click", function () {
+                    if (isConnected()) {
+                        if ($("#drp-rating").val() != "" && $("#txt-cmnt").val() != "") {
+                            const objToSend = {
+                                idProduit: "@Model.IdProduit",
+                                idUtilisateur: "@My_T_Shirt.Helpers.Authentication.getId(false)",
+                                rating: $("#drp-rating").val(),
+                                commentaire: $("#txt-cmnt").val(),
+                            }
+                            $.ajax({
+                                method: "POST",
+                                url: "@Url.Action("MakeAReview","DetailsProduit")",
+                                data: JSON.stringify(objToSend),
+                                contentType: "application/json",
+                                success: function (resp) {
+
+                                    Swal.fire({
+                                        title: 'Alert',
+                                        text: "Merci pour votre avis",
+                                        icon: "success",
+                                        confirmButtonColor: 'var(--success)',
+                                    });
+
+                                    console.log(resp);
+                                    $("#make-review").remove();
+                                    const rating = objToSend.rating;
+                                    const cmnt = objToSend.commentaire;
+                                    var html_rating = "";
+                                    if (rating == 1) {
+                                        html_rating = '<i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>';
+                                    }
+                                    else if (rating == 2) {
+                                        html_rating = '<i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>';
+                                    }
+                                    else if (rating == 3) {
+                                        html_rating = '<i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>';
+                                    } else if (rating == 4) {
+                                        html_rating = '<i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>';
+                                    } else if (rating == 5) {
+                                        html_rating = '<i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>';
+                                    }
+                                    const html_review = ` <div class="review p-1 border-bottom mb-3">
+                                                            <div class="justify-content-between d-flex">
+                                                                <h5>@My_T_Shirt.Helpers.Authentication.getPrenom(false) @My_T_Shirt.Helpers.Authentication.getNom(false)</h5>
+                                                                <small>@DateTime.Now.ToShortDateString()</small>
+                                                            </div>
+                                                            <p style="color:yellow">
+                                                              ${html_rating}                                                          
+                                                            </p>
+                                                                <p>
+                                                                 ${cmnt}
+                                                                </p>
+                                                        </div>`;
+                                    $("#reviews").prepend(html_review)
+                                },
+                                error: function (resp) {
+                                    Swal.fire({
+                                        title: 'Alert',
+                                        text: "erreur !",
+                                        icon: "error",
+                                        confirmButtonColor: 'var(--danger)',
+                                    });
+
+                                    console.log(resp);
+                                }
+                            });
+                        }
+                    }
+                    else {
+                        Swal.fire({
+                            title: 'Alert',
+                            text: "Connecter vous d'abbord",
+                            icon: "info",
+                            confirmButtonColor: 'var(--primary)',
+                        });
+                    }
+                });
+            }
+
+
+            
+
+
+
+        });
+    </script>
+} 
+

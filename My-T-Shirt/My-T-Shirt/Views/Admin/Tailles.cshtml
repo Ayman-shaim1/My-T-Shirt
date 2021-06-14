@@ -1,0 +1,116 @@
+﻿@model List<My_T_Shirt.Models.Taille>
+@{
+    ViewBag.Title = "Tailles";
+    Layout = "~/Views/Shared/_Layout_Admin.cshtml";
+}
+
+<div class="container mt-5">
+
+    @if (Model.Count == 0)
+    {
+        <div class="jumbotron jumbotron-fluid">
+            <div class="justify-content-center d-flex">
+                <h4>Il n ya aucune taille</h4>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID taille</th>
+                        <th>Nom taille</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="t-body-tailles">
+                    @foreach (var taille in Model)
+                    {
+                        <tr>
+                            <td>@taille.IdTaille</td>
+                            <td>@taille.Nom</td>
+                            <td>
+                                <div class="btn-group">
+                                    <button class="btn btn-danger btn-sm btn-supp" data-id="@taille.IdTaille"><i class="fas fa-trash-alt"></i></button>
+                                    <a class="btn btn-light btn-sm" href="/Admin/DetailsTaille?idTaille=@taille.IdTaille"><i class="fas fa-edit"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $(".btn-supp").on("click", function () {
+                var id = $(this).attr("data-id");
+                var parent = $(this).parent().parent().parent();
+
+                Swal.fire({
+                    title: 'Confirmation',
+                    text: "Etes vous sure de vouloire supprimer cette taille ?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: 'var(--primary)',
+                    cancelButtonColor: 'gray',
+                    confirmButtonText: 'oui',
+                    cancelButtonText: 'non'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        $.ajax({
+                            method: 'POST',
+                            url: '@Url.Action("SupprimerTaille","Admin")',
+                            data: JSON.stringify({
+                                idTaille:id,
+                            }),
+                            contentType: 'application/json',
+                            success: function (res) {
+                                console.log(res);
+                                Swal.fire({
+                                    title: 'Alert',
+                                    text: "Cette taille a ete supprimer avec success",
+                                    icon: 'success',
+                                    confirmButtonColor: 'var(--success)',
+
+                                });
+                                parent.remove();
+
+                                if($("#t-body-tailles").find("tr").length == 0)
+                                {
+                                    var container = $("#t-body-tailles").parent().parent();
+                                    $("#t-body-tailles").parent().remove();
+                                    container.append(`<div class="jumbotron jumbotron-fluid">
+                                                        <div class="justify-content-center d-flex">
+                                                            <h4>Il n ya aucune taille</h4>
+                                                        </div>
+                                                    </div>`);
+                                }
+                            },
+                            error: function (res) {
+                                console.log(res);
+                                Swal.fire({
+                                    title: 'Alert',
+                                    text: res.responseJSON.Message,
+                                    icon: 'error',
+                                    confirmButtonColor: 'var(--danger)',
+                                });
+                            }
+                        });
+                    }
+
+                    });
+            });
+
+        });
+    </script>
+}
+
+

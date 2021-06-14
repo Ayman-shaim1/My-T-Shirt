@@ -1,0 +1,273 @@
+﻿@model List<My_T_Shirt.ViewModel.ProduitPanier>
+@{
+    ViewBag.Title = "Panier";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <div>
+        @if (Model.Count == 0)
+        {
+            <div class="jumbotron jumbotron-fluid mt-3">
+                <div class="justify-content-center d-flex">
+                    <h1>Votre panier est vide</h1>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table mt-5">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Nom</th>
+                            <th>prix</th>
+                            <th>Taille choisie</th>
+                            <th>Quantite</th>
+                            <th></th>
+                            <th></th>
+
+                            <th>Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="panier-tbody">
+                        @foreach (var produit in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="/DetailsProduit?idProduit=@produit.idProduit">
+                                        <img src="@produit.Image" alt="@produit.idProduit" class="img-thumbnail" style="width:70px" />
+                                    </a>
+                                </td>
+                                <td>@produit.Nom</td>
+                                <td><span>@produit.prix.ToString()</span> MAD</td>
+                                <td>
+                                    <div class="justify-content-center d-flex">
+                                       @My_T_Shirt.Models.Taille.getNom(produit.idTaille)
+                                    </div>
+                                </td>
+                                <td colspan="3">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <button class="btn btn-primary btn-sm btn-diminuer-qte" data-id="@produit.idProduit" data-idTaille="@produit.idTaille"><i class="fas fa-minus"></i> </button>
+                                        </div>
+                                        <input type="text" class="form-control form-control-sm txt-qte" value="@produit.qte" disabled style="text-align:center;width:65px;" />
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary btn-sm btn-sm btn-augmenter-qte" data-id="@produit.idProduit" data-idTaille="@produit.idTaille" data-qte-stock="@My_T_Shirt.Models.Produit.getTailleQteStock(produit.idProduit,produit.idTaille)"><i class="fas fa-plus"></i></button>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="total"><span>@(produit.qte * produit.prix)</span> MAD</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm btn-supprimer" data-id="@produit.idProduit" data-idTaille="@produit.idTaille"><i class="fas fa-trash-alt"></i></button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }</div>
+        <hr />
+        <div class="justify-content-end d-flex mb-5">
+            <ul class="list-group" style="width:400px">
+                <li class="list-group-item">
+                    <div class="justify-content-between d-flex">
+                        <label>Nombre de produits :</label>
+                        <label id="lbl-nbr-prod"><span>@Model.Count</span></label>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <div class="justify-content-between d-flex">
+                        <label>Montant total : </label>
+                        <label id="lbl-mt"><span>0</span> MAD</label>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <button class="btn btn-primary btn-block" id="btn-acheter">
+                        Acheter
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <hr />
+        <!--Solde-->
+        <div class="mb-5">
+            <div class="justify-content-center d-flex mt-5 mb-5">
+                <h2 class="m-title">Produits en solde</h2>
+            </div>
+            <div>
+                @{
+                    Html.RenderAction("RenderSoldeProduits", "Produits");
+                }
+            </div>
+        </div>
+        <!--Solde-->
+    </div>
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+          
+            
+            function getMtTotal() {
+                var mt = 0;
+                $(".total").each(function (i, item) {
+                    var t = item.querySelector("span").innerText.split(",")[0] + "."+item.querySelector("span").innerText.split(",")[1];
+                    mt += parseFloat(t);
+                });
+                
+                $("#lbl-mt").find("span").html(mt.toString().substring(0,7));
+            }
+
+            function getNbrProd() {
+                var nbrProd = 0;
+                $(".txt-qte").each(function (i, item) {
+                    nbrProd += parseInt(item.value);
+                });
+                $("#lbl-nbr-prod").html(nbrProd);
+            }
+           
+            $(".btn-diminuer-qte").on("click", function () {
+                var txtqte = $(this).parent().parent().find("input");
+                var idProduit = $(this).data().id;
+                var idTaille = $(this).attr("data-idTaille");
+
+                var btn = $(this);
+                var qte = 0
+                if (txtqte.val() != 1) {
+                    
+                    $.ajax({
+                        method: 'POST',
+                        url: "@Url.Action("DiminuerQte", "Panier")",
+                        data: JSON.stringify({ idProduit, idTaille }),
+                        contentType: "application/json",
+                        success: function (resp) {
+                            console.log(resp);
+                            qte = parseInt(txtqte.val()) - 1
+                            txtqte.val(qte);
+                            var prix = btn.parent().parent().parent().parent().find("td").eq(2).find('span').text();
+                            var el_total = btn.parent().parent().parent().parent().find("td").eq(5).find('span');
+                            var t_prix = prix.split(",")[0] + "." + prix.split(",")[1]
+                            var total = parseFloat(parseFloat(t_prix) * qte);
+
+                            el_total.text(total.toString().substring(0, 7));
+
+                            getMtTotal();
+
+                            getNbrProd();
+                        }, error: function (resp) {
+                            console.log(resp);
+                        }
+                    });
+                }
+
+            });
+
+            $(".btn-augmenter-qte").on("click", function () {
+                var btn = $(this);
+                var qteStock = $(this).data().qteStock;
+                var idProduit = $(this).data().id;
+                var idTaille = $(this).attr("data-idTaille");
+                var txtqte = $(this).parent().parent().find("input");
+                var qte = 0
+                if (txtqte.val() != qteStock) {
+
+                    $.ajax({
+                        method: 'POST',
+                        url: "@Url.Action("AugmenterQte", "Panier")",
+                        data: JSON.stringify({ idProduit, idTaille }),
+                        contentType:"application/json",
+                        success: function (resp) {
+                            console.log(resp);
+                            qte = parseInt(txtqte.val()) + 1
+                            txtqte.val(qte);
+
+                            var prix = btn.parent().parent().parent().parent().find("td").eq(2).find('span').text();
+                            var el_total = btn.parent().parent().parent().parent().find("td").eq(5).find('span');
+                            var t_prix = prix.split(",")[0] + "." + prix.split(",")[1];
+                            var total = parseFloat(parseFloat(t_prix) * qte);
+
+
+
+                            el_total.text(total.toString().substring(0, 7));
+
+                            getMtTotal();
+                            getNbrProd();
+                        },
+                        error: function (resp) {
+                            console.log(resp);
+                        }
+                    });
+
+                }
+            });
+
+
+            $(".btn-supprimer").on("click", function () {
+                var idProduit = $(this).data().id;
+                var idTaille = $(this).attr("data-idTaille");
+
+       
+                var ligne = $(this).parent().parent();
+                var tbody = ligne.parent();
+                var table = tbody.parent();
+                var parentDiv = table.parent().parent();
+                $.ajax({
+                    method: 'POST',
+                    url: "@Url.Action("supprimerDuPanier", "Panier")",
+                    data: JSON.stringify({ idProduit, idTaille}),
+                    contentType: "application/json",
+                    success: function (resp) {
+                        console.log(resp);
+                        ligne.remove();
+                        if (tbody.children().length == 0) {
+                            table.remove();
+                            const msg = `<div class="jumbotron jumbotron-fluid mt-3">
+                                            <div class="justify-content-center d-flex">
+                                                <h1>Votre panier est vide</h1>
+                                            </div>
+                                        </div>`;
+                            parentDiv.html(msg)
+                        }
+                        getMtTotal();
+                        getNbrProd();
+                    },
+                    error: function (resp) {
+                        console.log(resp);
+                    },
+                })
+            });
+
+            $("#btn-acheter").on("click", function () {
+                var isValid = true;
+                if ($("#panier-tbody").length == 0) {
+                    isValid = false;
+                    Swal.fire({
+                        title: 'Alert',
+                        text: "Votre panier est vide",
+                        icon: "info",
+                        confirmButtonColor: 'var(--primary)',
+                    });
+                }
+                if (!isConnected() && $("#panier-tbody").length != 0) {
+                    isValid = false;
+                    Swal.fire({
+                        title: 'Alert',
+                        text: "Connecter vous d'abbord",
+                        icon: "info",
+                        confirmButtonColor: 'var(--primary)',
+                    });
+                }
+
+                if (isValid) {
+                    window.location.href = "/AdresseCommande";
+                } 
+
+            });
+            getMtTotal();
+            getNbrProd();
+        });
+    </script>
+}

@@ -1,0 +1,132 @@
+﻿@model PagedList.IPagedList<My_T_Shirt.Models.Commande>
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "Commandes";
+    Layout = "~/Views/Shared/_Layout_Admin.cshtml";
+}
+
+<div class="container pl-1 pr-1 mt-5">
+
+    <div class="">
+
+        <div class="justify-content-center d-flex">
+            <a href="/Admin/commandes" class="btn btn-light btn-sm">Tous les commandes</a>
+            <a href="/Admin/commandes?type=livree" class="btn btn-light btn-sm">commandes Livrées</a>
+            <a href="/Admin/commandes?type=nonlivree" class="btn btn-light btn-sm">commandes non livrées</a>
+        </div>
+    </div>
+    <hr />
+    <div>
+
+        
+            <div class="d-flex">
+                <input type="date" class="form-control form-control-sm mr-4" id="txt-date-debut" name="dateDebut" value="@ViewBag.dateDebut" />
+                <input type="date" class="form-control form-control-sm mr-3" id="txt-date-fin" name="dateFin" value="@ViewBag.dateFin" />
+                <button class="btn btn-primary btn-sm" id="btn-search-by-date"><i class="fas fa-search mt-1"></i></button>
+            </div>
+        
+    </div>
+    <hr/>
+
+    @if (Model.Count == 0)
+    {
+        <div class="jumbotron-fluid jumbotron">
+            <div class="justify-content-center d-flex">
+                <h4>Il n ya aucune commande</h4>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>ID&nbsp;commande</th>
+                        <th>Nom&nbsp;Prenom&nbsp;d'utilisateur</th>
+                        <th>Date&nbsp;commande</th>
+                        <th>LIVRÉ</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var commande in Model)
+                    {
+                        <tr>
+                            <td class="w-100">@commande.IdCommande</td>
+
+                            <td>
+                                <div class="justify-content-center d-flex">
+                                    <span>@My_T_Shirt.Models.Commande.getPrenom(commande.IdCommande)</span>&nbsp;
+                                    <span>@My_T_Shirt.Models.Commande.getNom(commande.IdCommande)</span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span>@commande.Date_Com.ToShortDateString()&nbsp;@commande.Date_Com.ToLongTimeString()</span>
+                            </td>
+                            <td>
+                                @if (!commande.isDelivered)
+                                {
+                                    <span class="justify-content-center d-flex text-danger">
+                                        <i class="fas fa-times"></i>
+                                    </span>
+                                }
+                                else
+                                {
+
+                                    <span class="text-success">@DateTime.Parse(commande.Date_Livraison.ToString()).ToShortDateString()&nbsp;@DateTime.Parse(commande.Date_Livraison.ToString()).ToLongTimeString()</span>
+
+                                }
+                            </td>
+                            <th>
+                                <a class="btn btn-light btn-sm" href="/Admin/DetailsCommande?idCommande=@commande.IdCommande"><i class="fas fa-edit"></i></a>
+                            </th>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="justify-content-center d-flex">
+            @Html.PagedListPager(Model, page =>
+                                     Url.Action("/Commandes", new
+                                     {
+                                         page = page,
+                                         type = ViewBag.type
+
+                                     }),
+                                     new PagedListRenderOptions
+                                     {
+                                         LiElementClasses = new string[] { "page-item" },
+                                         UlElementClasses = new string[] { "pagination pagination-sm" },
+                                         LinkToPreviousPageFormat = "precedent",
+                                         LinkToNextPageFormat = "suivant",
+
+                                     })
+        </div>
+        }
+</div>
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function(){
+          $(".page-item").find("a").addClass("page-link");
+        });
+
+        $("#btn-search-by-date").on("click", function () {
+            const type = '@ViewBag.type';
+            const dateDebut = $('#txt-date-debut').val();
+            const dateFin = $('#txt-date-fin').val();
+
+            if (dateDebut != "" && dateFin != "") {
+                if (type != '') {
+                    window.location.href = `/Admin/commandes?type=${type}&dateDebut=${dateDebut}&dateFin=${dateFin}`;
+                }
+                else {
+                    window.location.href = `/Admin/commandes?dateDebut=${dateDebut}&dateFin=${dateFin}`
+                }
+            }
+        
+        });
+    </script>
+}

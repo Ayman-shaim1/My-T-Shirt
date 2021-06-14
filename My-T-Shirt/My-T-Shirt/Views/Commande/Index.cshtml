@@ -1,0 +1,154 @@
+﻿@model My_T_Shirt.ViewModel.ShowCommande
+@{
+    ViewBag.Title ="Commande";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="justify-content-center d-flex mt-5">
+        <table class="table">
+            <tr>
+                <td colspan="2">ID Commande :</td>
+                <td > @Model.IdCommande</td>
+            </tr>
+            <tr >
+                <td colspan="2">Date Commande :</td>
+                <td>@Model.Date_Com</td>
+            </tr>
+        </table>
+    </div>
+    <hr />
+
+    <div class="row">
+        <div class="col-xl-7 col-lg-7 col-md-12 col-sm-12">
+
+            <div class="justify-content-center d-flex mt-3">
+                <h5 class="m-title">Adresse commande</h5>
+            </div>
+
+            <div class="table-responsive mt-2 mb-3">
+                <table class="table">
+                    <tr>
+                        <td>Pays : </td>
+                        <td>@Model.Pays_Com</td>
+                    </tr>
+                    <tr>
+                        <td>Ville : </td>
+                        <td>@Model.Ville_Com</td>
+                    </tr>
+                    <tr>
+                        <td>CodePostal : </td>
+                        <td>@Model.CodePostal_Com</td>
+                    </tr>
+                </table>
+                <table class="table-sm table">
+                    <tr>
+                        <td colspan="2">
+                            <div class="justify-content-center d-flex">
+                                <h6>Adresse</h6>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">@Model.Adresse_Com</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="justify-content-center d-flex mt-3">
+                <h5 class="m-title">Produits</h5>
+            </div>
+
+            <div class="table-responsive mt-2 mb-3">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Nom</th>
+                            <th>qte</th>
+                            <th>prix</th>
+                            <th>taille choisie</th>
+                            <th>total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var produit in Model.produits)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="/DetailsProduit?idProduit=@produit.idProduit">
+                                         <img src="@produit.Image" class="img-thumbnail" style="width:70px" />
+                                    </a>
+                                </td>
+                                <td>@produit.Nom</td>
+                                <td><span class="qte">@produit.qte</span></td>
+                                <td>@My_T_Shirt.Models.Solde.getPrixSolde(produit.idProduit) MAD</td>
+                                <td>
+                                    <div class="justify-content-center d-flex">
+                                        <span>@My_T_Shirt.Models.Taille.getNom(produit.idTaille)</span>
+                                    </div>
+                                </td>
+                                <td>@(My_T_Shirt.Models.Solde.getPrixSolde(produit.idProduit) * produit.qte) MAD</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+
+        <div class="col-xl-5 col-lg-5 col-md-12 col-sm-12">
+            <ul class="list-group mt-5">
+                <li class="list-group-item">
+                    <div class="justify-content-between d-flex">
+                        <label>Nombre de produits :</label>
+                        <label id="lbl-nbrProds">0  </label>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <div class="justify-content-between d-flex">
+                        <label>Montant Total :</label>
+                        <label><span id="lbl-mt">@My_T_Shirt.Models.Commande.getMontantTotal(Model.IdCommande)</span> MAD</label>
+                    </div>
+                </li>
+            </ul>
+            <ul class="mt-3  list-group">
+                <li class="list-group-item ">
+
+                    @if (!Model.isDelivered)
+                    {
+                        <div class="alert alert-danger mb-0">
+                            <div class="justify-content-center d-flex ">
+                                <h6 class="mb-0">cette commande n'est pas encore livrée</h6>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success mb-0 ">
+                            <div class="justify-content-center d-flex ">
+                                <h6 class="mb-0">livré le @Model.Date_Livraison </h6>
+                            </div>
+                        </div>
+                    }
+                </li>
+            </ul>
+        </div>
+        
+
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function(){
+            var qte = 0;
+            $(".qte").each(function (i,val) {
+                qte += parseInt(val.textContent)
+            });
+            $("#lbl-nbrProds").text(qte);
+        });
+    </script>
+}

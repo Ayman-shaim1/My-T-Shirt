@@ -1,0 +1,50 @@
+﻿
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    min-height:750px;
+}
+textarea {
+    resize: none;
+    min-height: 150px
+}
+footer div p {
+    font-size:12px
+}
+.navbar .navbar-nav .nav-item .nav-link {
+    font-size: 10px;
+}
+.m-title {
+    font-family: 'Kalam';
+}
+
+.jconfirm .jconfirm-box .jconfirm-buttons button {
+border-radius:0;
+}
+
+.m-produit .m-produit-image-box {
+    position: relative;
+}
+
+    .m-produit .m-produit-image-box a {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        display: none
+    }
+
+    .m-produit .m-produit-image-box:hover img {
+        opacity: 0.5
+    }
+
+    .m-produit .m-produit-image-box:hover a {
+        display: block;
+        z-index: 100;
+    }
+
+    .m-produit .m-produit-image-box .badge {
+        position: absolute;
+        right: 2%;
+        top: 2%;
+        z-index: 100;
+    }

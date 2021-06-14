@@ -1,0 +1,536 @@
+﻿@model My_T_Shirt.Models.Produit
+
+@{
+    ViewBag.Title = "Details Produit";
+    Layout = "~/Views/Shared/_Layout_Admin.cshtml";
+    var lstMarques =  (List<My_T_Shirt.Models.Marque>)ViewData["marques"];
+    var lstTailles = (List<My_T_Shirt.Models.Taille>)ViewData["tailles"];
+
+}
+<style>
+    .img-box{
+        position:relative
+    }
+    .img-box .badge{
+        right:1%;
+        top:1%;
+        position:absolute;
+        width:70px;
+        font-size:11px;
+    }
+    label.error {
+        color: var(--danger);
+        margin-top: 3px;
+    }
+</style>
+<!-- Modal -->
+<div class="modal fade" id="add-to-solde-modal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Ajouter au solde</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label>pourcentage</label>
+                        <input type="number" class="form-control" id="txt-pourcentage"/>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary" id="btn-add-to-solde">Ajouter</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4 p-3">
+
+    <div class="justify-content-between d-flex">
+
+        <a href="/Admin/Produits" class="btn btn-light">Retour</a>
+        <div id="btns-solde">
+            @if (!My_T_Shirt.Models.Solde.inSolde(Model.IdProduit))
+            {
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add-to-solde-modal">
+                    Ajouter au solde
+                </button>
+            }
+            else
+            {
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-primary" id="btn-retirer-solde">
+                    retirer ce produit du solde
+                </button>
+            }
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-lg-6 col-md-6 col-sm-12  mb-5">
+            <div class="m-auto w-100">
+                <div class="img-box">
+                    @if (My_T_Shirt.Models.Solde.inSolde(Model.IdProduit))
+                    {
+                        <span class="badge badge-danger">solde</span>
+                    }
+                    <img src="@Model.Image" class="img-thumbnail" id="show-image" />
+                </div>
+
+                <div class="" style="margin-top:70px">
+                    <input type="file" class="form-control " id="ch-photo" accept=".jpg,.jpeg,.png,.svg" />
+                    <button class="btn btn-primary btn-block mt-2" id="btn-change-photo">Modifier la photo</button>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-12 ">
+            @using (Html.BeginForm("", "", FormMethod.Post, new { id = "frm-modifier" }))
+            {
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Nom, htmlAttributes: new { @class = "form-label" })
+                    @Html.TextBoxFor(model => model.Nom, new { @class = "form-control", @placeholder = "introduire le nom" })
+                </div>
+                <div class="card mt-2 mb-2">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Actuel marque :</label>
+                            <input type="text" id="txt-ac-marque" class="form-control" value="@My_T_Shirt.Models.Marque.getNom(@Model.idMarque)" disabled />
+                        </div>
+                        <div class="form-group">
+                            <label>Choisire une autre marque :</label>
+                            <select id="idMarque" name="idMarque" class="form-control">
+                                <option value="">--- selectionner une marque ---</option>
+                                @foreach (var marque in lstMarques)
+                                {
+                                    <option value="@marque.IdMarque">@marque.Nom</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Prix, htmlAttributes: new { @class = "form-label" })
+                    @Html.TextBoxFor(model => model.Prix, new { @class = "form-control", @placeholder = "introduire la marque", @type = "number" })
+                </div>
+     
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "form-label" })
+                    @Html.TextAreaFor(model => model.Description, htmlAttributes: new { @class = "form-control", @placeholder = "introduire la description" })
+                </div>
+
+                <div class="form-check">
+                    <label class="form-check-label">
+                        @if (Model.Genre == "Homme")
+                        {
+                            <input type="radio" class="form-check-input" name="Genre" id="rad-homme" value="Homme" checked>
+                        }
+                        else
+                        {
+                            <input type="radio" class="form-check-input" name="Genre" id="rad-homme" value="Homme">
+                        }
+                        Homme
+                    </label>
+                </div>
+                <div class="form-check">
+                    <label class="form-check-label">
+                        @if (Model.Genre == "Femme")
+                        {
+                            <input type="radio" class="form-check-input" name="Genre" id="rad-femme" value="Femme" checked />
+                        }
+                        else
+                        {
+                            <input type="radio" class="form-check-input" name="Genre" id="rad-femme" value="Femme" />
+                        }
+
+                        Femme
+                    </label>
+                </div>
+
+                <div class="">
+                    <button class="btn btn-primary btn-block mt-3" type="submit" id="">Modifier</button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="mt-5 card">
+        <div class="card-body">
+            <div class="justify-content-center d-flex mb-2">
+                <h4>Modifier tailles</h4>
+            </div>
+            <div class="row justify-content-center d-flex">
+                @foreach (var taille in lstTailles)
+                {
+                    <button class="btn  btn-light btn-taille ml-1" data-id="@taille.IdTaille">@taille.Nom</button>
+                }
+            </div>
+            <hr />
+            <div id="mod-qteStock">
+                <div class="jumbotron jumbotron-fluid mt-4" id="qte-stock-msg">
+                    <div class="justify-content-center d-flex">
+                        <h3>Choisire une taille</h3>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            const id = window.location.href.split("idProduit=")[1];
+
+            document.getElementById("ch-photo").onchange = function (e) {
+                const image = document.getElementById("show-image");
+                const tmppath = URL.createObjectURL(event.target.files[0]);
+                if(tmppath)
+                image.src = tmppath;
+            };
+
+            $("#idMarque").val('@Model.idMarque');
+
+
+
+            $(".btn-taille").on("click", function () {
+                $(".btn-taille.active").removeClass("active");
+                $(this).addClass("active");
+                const idTaille = $(this).attr("data-id");
+
+                const objToSend = {
+                    idProduit: id,
+                    idTaille: idTaille,
+                };
+
+                $.ajax({
+                    method: "POST",
+                    url: '@Url.Action("getTailleQteStock", "Admin")',
+                    data: JSON.stringify(objToSend),
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function (resp) {
+
+                        console.log(resp);
+                        const qteStock = resp.qteStock;
+
+                        $("#qte-stock-msg").remove();
+                        $("#qte-stock-zz").remove();
+
+                        $("#mod-qteStock").append(` <div class="row" id="qte-stock-zz">
+                                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 border-right">
+                                                <div class="form-group" id="qtestock-actuel">
+                                                    <label>Quantite stock actuel</label>
+                                                    <input type="text" name="name" value="${qteStock}" class="form-control" disabled id="txt-qteStock-actuel" />
+                                                </div>
+
+                                            </div>
+                                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 border-right">
+                                                <div>
+                                                    <div class="form-group">
+                                                        <label>Nouvelle quantite en stock</label>
+                                                        <input type="number" class="form-control" id="txt-n-qteStock" />
+                                                    </div>
+                                                    <button class="btn btn-primary btn-block mt-1" id="btn-mod-qteStock">
+                                                        Modifier la quantite ed stock
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>`);
+                        changeQteStock();   
+                    },
+                    error: function (resp) {
+                        console.log(resp);
+                        Swal.fire({
+                            title: 'Alert',
+                            text: resp.responseJSON.Message,
+                            icon: 'error',
+                            confirmButtonColor: 'var(--danger)',
+                        });
+                    }
+                    
+                })
+            });
+
+            function changeQteStock() {
+                $("#btn-mod-qteStock").on("click", function () {
+                    const idTaille = $(".btn-taille.active").attr("data-id");
+                    const idProduit = id;
+                    const nouvelle_qteStock = parseInt($("#txt-n-qteStock").val());
+
+                    const objToSend = {
+                        idProduit,
+                        idTaille,
+                        nouvelle_qteStock
+                    }
+
+                    $.ajax({
+                        method: "POST",
+                        url: "@Url.Action("ModfierQteStock", "Admin")",
+                        data: JSON.stringify(objToSend),
+                        contentType: "application/json",
+                        success: function (resp) {
+                            console.log(resp);
+
+                            Swal.fire({
+                                title: 'Alert',
+                                text: "Modfication effectuee avec success",
+                                icon: 'success',
+                                confirmButtonColor: 'var(--success)',
+                            });
+
+                            $("#txt-n-qteStock").val("");
+                            $("#txt-qteStock-actuel").val(nouvelle_qteStock);
+                        },
+                        error: function (resp) {
+                            console.log(resp);
+                            Swal.fire({
+                                title: 'Alert',
+                                text: resp.responseJSON.Message,
+                                icon: 'error',
+                                confirmButtonColor: 'var(--danger)',
+                            });
+                        }
+                    });
+
+
+                });
+            }
+
+            $("#btn-change-photo").on("click", function () {
+                const file = $('#ch-photo').get(0).files;
+
+                if (file.length !== 0) {
+
+                    const formData = new FormData();
+
+                    formData.append("idProduit", id);
+                    formData.append("upload", $('#ch-photo')[0].files[0]);
+
+
+                    $.ajax({
+                        method: 'POST',
+                        url: "@Url.Action("ModifierProduit_Image", "Admin")",
+                        data: formData, /*{ idProduit: id, upload: $('#ch-photo')[0].files[0]},*/
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        success: function (resp) {
+                            console.log(resp);
+                            Swal.fire({
+                                title: 'Alert',
+                                text: "Modification d'image est effectuee avec success ",
+                                icon: 'success',
+                                confirmButtonColor: 'var(--success)',
+                            });
+                        },
+                        error: function (resp) {
+                            console.log(resp);
+                            Swal.fire({
+                                title: 'Alert',
+                                text: resp.responseJSON.Message,
+                                icon: 'error',
+                                confirmButtonColor: 'var(--danger)',
+                            });
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Alert',
+                        text: "il faut choisire une image !",
+                        icon: 'error',
+                        confirmButtonColor: 'var(--danger)',
+                    });
+                }
+            })
+
+
+            $('#frm-modifier').validate({
+                rules: {
+                    Nom: {
+                        required: true
+                    },
+                    Marque: {
+                        required: true
+
+                    },
+                    Prix: {
+                        required: true
+
+                    },
+                    QteStock: {
+                        required: true
+
+                    },
+                    Description: {
+                        required: true
+
+                    },
+                    idMarque: {
+                        required: true
+
+                    }
+                },
+                messages: {
+                    Nom: {
+                        required: "il faut saisire le nom "
+                    },
+                    Marque: {
+                        required: "il faut saisire la marque"
+
+                    },
+                    Prix: {
+                        required: "if faut saisire le prix"
+
+                    },
+                    QteStock: {
+                        required: "il faut saisire la quantite stock"
+
+                    },
+                   
+                    Description: {
+                        required: "if faut saisire la description"
+
+                    },
+                    idMarque: {
+                        required: "il faut choisire une aure marque"
+
+                    }
+                },
+                
+                submitHandler: function () {
+                    const objToSend = {
+                        IdProduit: id,
+                        Nom: $("#Nom").val(),
+                        Description: $("#Description").val(),
+
+                        Genre: $("#Genre").val(),
+                        Prix: $("#Prix").val(),
+                        QteStock: $("#QteStock").val(),
+                        Genre: $("#rad-femme").is(":checked") ? "Femme" : "Homme",
+                        idMarque: $("#idMarque").val(),
+                    };
+
+                $.ajax({
+                    method: 'POST',
+                    url: '@Url.Action("ModifierProduit","Admin")',
+                    data: JSON.stringify(objToSend),
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    success: function (resp) {
+                        console.log(resp);
+                        Swal.fire({
+                            title: 'Alert',
+                            text: "Modification effectuee avec success ",
+                            icon: 'success',
+                            confirmButtonColor: 'var(--success)',
+                        });
+                        const name = $(`#idMarque option[value='${objToSend.idMarque}']`).text();
+                        $("#txt-ac-marque").val(name);
+                    },
+                    error: function (resp) {
+                        console.log(resp);
+                        alert(JSON.parse(resp.responseText).error);
+                    }
+                });
+                }
+            })
+
+            function addToSolde() {
+                $('#btn-add-to-solde').on("click", function () {
+                if ($("#txt-pourcentage").val() !== "") {
+                    var objToSend = {
+                        idProduit: id,
+                        pourcentage: $("#txt-pourcentage").val()
+                    }
+                    $.ajax({
+                        method: 'POST',
+                        url: '@Url.Action("AjouterAuSolde", "Admin")',
+                        data: JSON.stringify(objToSend),
+                        contentType: "application/json",
+                        success: function (a, b, c) {
+                            console.log(c.responseJSON);
+                            $("#txt-pourcentage").val("");
+                            $(".img-box").append('<span class="badge badge-danger">solde</span>');
+                            $("#btns-solde").html("");
+                            $("#btns-solde").append(`<button type="button" class="btn btn-primary" id="btn-retirer-solde">
+                                                        retirer ce produit du solde
+                                                    </button>`);
+
+                            $('#add-to-solde-modal').modal('hide');
+                            Swal.fire({
+                                title: 'Alert',
+                                text: "ce produit est ajouter en solde avec success ",
+                                icon: 'success',
+                                confirmButtonColor: 'var(--success)',
+                            });
+                            removeFromSolde(); 
+                        },
+                        error: function (resp) {
+                            console.log(resp);
+                            Swal.fire({
+                                title: 'Alert',
+                                text: resp.responseJSON.Message,
+                                icon: 'success',
+                                confirmButtonColor: 'var(--success)',
+                            });
+                        }
+                    });
+                }
+            });
+            }
+
+            function removeFromSolde() {
+                 $("#btn-retirer-solde").on("click", function () {
+                $.ajax({
+                    method: "post",
+                    url: '@Url.Action("SupprimerSolde", "Admin")',
+                    data: JSON.stringify({ idProduit: "@Model.IdProduit" }),
+                    contentType: "application/json",
+                    success: function (resp) {
+                        console.log(resp);
+                        Swal.fire({
+                            title: 'Alert',
+                            text: "ce produit est retirer du solde avec success ",
+                            icon: 'success',
+                            confirmButtonColor: 'var(--success)',
+                        });
+
+                        $(".img-box span").remove();
+                        $("#btns-solde").html("");
+                        $("#btns-solde").append(`<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add-to-solde-modal">
+                                                    Ajouter au solde
+                                                </button>`);
+
+                        addToSolde();
+                    },
+                    error: function (resp) {
+                        console.log(resp);
+                        Swal.fire({
+                            title: 'Alert',
+                            text: resp.responseJSON.Message,
+                            icon: 'error',
+                            confirmButtonColor: 'var(--danger)',
+                        });
+                    }
+                })
+               
+                });
+            }
+
+
+           
+
+            removeFromSolde();
+            addToSolde();
+        });
+    </script>
+}

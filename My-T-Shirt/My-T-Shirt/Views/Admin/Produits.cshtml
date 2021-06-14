@@ -1,0 +1,132 @@
+﻿@model PagedList.IPagedList<My_T_Shirt.Models.Produit>
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "Produits";
+    Layout = "~/Views/Shared/_Layout_Admin.cshtml";
+}
+<div class="container mt-5">
+    <div class="table-responsive">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>IMAGE</th>
+                    <th>ID&nbsp;PRODUIT</th>
+                    <th>NOM</th>
+                    <th>MARQUE</th>
+                    <th>GENRE</th>
+                    <th>PRIX</th>
+                    @*<th>QteStock</th>*@
+                    <th>En&nbsp;solde</th>
+                    <th colspan="3"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><img src="@item.Image" alt="@item.IdProduit" class="img-thumbnail" style="width:70px"/></td>
+                        <td>@item.IdProduit</td>
+                        <td>@item.Nom</td>
+                        <td>@My_T_Shirt.Models.Marque.getNom(item.idMarque)</td>
+                        <td>@item.Genre</td>
+                        <td>@item.Prix</td>
+                        @*<td>@item.QteStock</td>*@
+                        <td>
+                            @if(My_T_Shirt.Models.Solde.inSolde(item.IdProduit))
+                            {
+                            <span class="justify-content-center d-flex text-success font-weight-bold" style="font-size:16px">
+                                @My_T_Shirt.Models.Solde.getPourcentage(item.IdProduit) %
+                            </span>
+                            }
+                            else
+                            {
+                                <span class="justify-content-center d-flex text-danger">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                            }
+                        </td>
+                        <td>
+                                <div class="btn-group">
+                                    <button class="btn btn-danger btn-sm btn-supp" data-id="@item.IdProduit"><i class="fas fa-trash-alt"></i></button>
+                                    <a class="btn btn-light btn-sm" href="/Admin/DetailsProduit?idProduit=@item.IdProduit"><i class="fas fa-edit"></i></a>
+                                </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        </div>
+       <hr/>
+       <div class="justify-content-center d-flex">
+           @Html.PagedListPager(Model, page =>
+                                       Url.Action("/Produits", new {
+                                           page = page,
+                                       }),
+                                       new PagedListRenderOptions
+                                       {
+                                           LiElementClasses = new string[] { "page-item" },
+                                           UlElementClasses = new string[] { "pagination pagination-sm" },
+                                           LinkToPreviousPageFormat = "previous",
+                                           LinkToNextPageFormat = "next",
+
+                                       })
+       </div>
+    </div>
+
+    @section scripts
+{
+        <script type="text/javascript">
+            $(function () {
+                $(".page-item").find("a").addClass("page-link");
+                $(".btn-supp").on("click", function () {
+                    var id = $(this).attr("data-id");
+                    var parent = $(this).parent().parent().parent();
+
+                    Swal.fire({
+                        title: 'Confirmation',
+                        text: "Etes vous sure de vouloire supprimer ce produit",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: 'var(--primary)',
+                        cancelButtonColor: 'gray',
+                        confirmButtonText: 'oui',
+                        cancelButtonText:'non'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+
+                            $.ajax({
+                                method: 'POST',
+                                url: "/Admin/SupprimerProduit?idProduit=" + id,
+                                contentType: 'application/json',
+                                success: function (res) {
+                                    console.log(res);
+                                    Swal.fire({
+                                        title: 'Alert',
+                                        text: "Ce produit est supprimer avec success",
+                                        icon: 'success',
+                                        confirmButtonColor: 'var(--success)',
+                                        
+                                    });
+                                    parent.remove();
+                                },
+                                error: function (res) {
+                                    console.log(res);
+                                    Swal.fire({
+                                        title: 'Alert',
+                                        text: res.responseJSON.Message,
+                                        icon: 'error',
+                                        confirmButtonColor: 'var(--danger)',
+                                    });
+                                }
+                            });
+                        }
+
+                    });
+
+
+                });
+
+            });
+      
+        </script>
+    }

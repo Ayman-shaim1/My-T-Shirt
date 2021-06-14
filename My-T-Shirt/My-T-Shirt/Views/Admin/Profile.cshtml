@@ -1,0 +1,178 @@
+﻿
+@{
+    ViewBag.Title = "Profile";
+    Layout = "~/Views/Shared/_Layout_Admin.cshtml";
+}
+
+<div class="container mt-5">
+    <h4>ADMIN : <span class="text-success">@My_T_Shirt.Helpers.Authentication.getEmail(true)</span></h4>
+    <hr />
+    <ul class="nav nav-tabs mt-5" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="modfier-nom-prenom-tab" data-toggle="tab" href="#modfier-nom-prenom" role="tab" aria-controls="home" aria-selected="true">Modfier Nom/Prenom</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="modfier-password-tab" data-toggle="tab" href="#modfier-password" role="tab" aria-controls="profile" aria-selected="false">Modfier mot de passe</a>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="modfier-nom-prenom" role="tabpanel" aria-labelledby="modfier-nom-prenom-tab">
+            <div style="padding:0 20% 0 20%;margin-top:30px">
+                <form id="frmModNomPrenom">
+                    <div class="form-group">
+                        <label>Nom </label>
+                        <input type="text" class="form-control" value="@My_T_Shirt.Helpers.Authentication.getNom(true)" name="txt-nom" id="txt-nom" />
+                    </div>
+                    <div class="form-group">
+                        <label>Prenom </label>
+                        <input type="text" class="form-control" value="@My_T_Shirt.Helpers.Authentication.getPrenom(true)" name="txt-prenom" id="txt-prenom" />
+                    </div>
+
+                    <button class="btn btn-primary btn-block" type="submit">Modifier</button>
+                </form>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="modfier-password" role="tabpanel" aria-labelledby="modfier-password">
+            <div style="padding:0 20% 0 20%;margin-top:30px">
+                <form id="frmModMdp">
+                    <div class="form-group">
+                        <label>Mot de passe actuel </label>
+                        <input type="password" class="form-control" name="txt-mdp-actuel" id="txt-mdp-actuel" />
+                    </div>
+                    <div class="form-group">
+                        <label>Nouveau mot de passe </label>
+                        <input type="password" class="form-control" name="txt-new-mdp" id="txt-new-mdp" />
+                    </div>
+                    <div class="form-group">
+                        <label>Confirmer le nouveau mot de passe </label>
+                        <input type="password" class="form-control" name="txt-confirm-new-mdp" id="txt-confirm-new-mdp" />
+                    </div>
+                    <button class="btn btn-primary btn-block">Modifier</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $("#frmModNomPrenom").validate({
+                rules: {
+                    "txt-nom": {
+                        required: true,
+                    },
+                    "txt-prenom": {
+                        required: true,
+                    }
+
+                },
+                messages: {
+                    "txt-nom": {
+                        required: "il faut saisire le nom",
+                    },
+                    "txt-prenom": {
+                        required: "il faut saisire le prenom",
+                    },
+                },
+                submitHandler: function () {
+
+                    const objToSend = {
+                        nom: $("#txt-nom").val(),
+                        prenom: $("#txt-prenom").val(),
+                    };
+
+                    $.ajax({
+                        method: "post",
+                        url: "@Url.Action("ModifierInfo", "Admin")",
+                        data: JSON.stringify(objToSend),
+                        contentType:"application/json",
+                        success: function (resp) {
+                            console.log(resp);
+                            $("#navbar-nom").text(objToSend.nom);
+                            $("#navbar-prenom").text(objToSend.prenom);
+
+                            Swal.fire({
+                                title: 'Alert',
+                                text: "Modification effectuee avec success",
+                                icon: "success",
+                                confirmButtonColor: 'var(--success)',
+                            });
+                        },
+                        error: function (resp) {
+                            console.log(resp);
+                        }
+                    });
+
+
+                }
+            });
+
+             $("#frmModMdp").validate({
+                rules: {
+                    "txt-mdp-actuel": {
+                        required:true,
+                    },
+                    "txt-new-mdp": {
+                        required: true,
+                        minlength:5,
+                    },
+                    "txt-confirm-new-mdp": {
+
+                        equalTo: "#txt-new-mdp"
+                    },
+                 },
+                 messages: {
+                     "txt-mdp-actuel": {
+                         required: "il faut saisire le mot de passe actuel",
+                     },
+                     "txt-new-mdp": {
+                         required: "il faut saisire le nouveau mot de passe",
+                         minlength: "mot de passe faible !",
+                     },
+                     "txt-confirm-new-mdp": {
+                         equalTo: "Le mot de passe et le mot de passe de confirmation doivent être identiques !"
+                     },
+                 },
+                submitHandler: function () {
+                    const objToSend = {
+                        MotDePasseActuel: $("#txt-mdp-actuel").val(),
+                        NouveauMotDePasse: $("#txt-new-mdp").val(),
+                    };
+
+                    $.ajax({
+                        method: "post",
+                        url: "@Url.Action("ModfierMotDePasse", "Admin")",
+                        data: JSON.stringify(objToSend),
+                        contentType: "application/json",
+                        success: function (resp) {
+                            console.log(resp);
+
+                            Swal.fire({
+                                title: 'Alert',
+                                text: "Modification effectuee avec success",
+                                icon: "success",
+                                confirmButtonColor: 'var(--success)',
+                            });
+
+                            $("#txt-mdp-actuel").val("");
+                            $("#txt-new-mdp").val("");
+                            $("#txt-confirm-new-mdp").val("");
+
+                        },
+                        error: function (resp) {
+                         console.log(resp);
+                            Swal.fire({
+                                title: 'Alert',
+                                text: resp.responseJSON.Message,
+                                icon: "error",
+                                confirmButtonColor: 'var(--danger)',
+                            });
+                        }
+                    })
+                }
+            });
+        });
+    </script>
+}

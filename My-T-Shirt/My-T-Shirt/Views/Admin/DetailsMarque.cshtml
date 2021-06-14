@@ -1,0 +1,80 @@
+﻿@model My_T_Shirt.Models.Marque
+@{
+    ViewBag.Title = "DetailsMarque";
+    Layout = "~/Views/Shared/_Layout_Admin.cshtml";
+}
+<style>
+    label.error {
+        color: var(--danger);
+        margin-top: 3px;
+    }
+</style>
+<div class="container">
+    <div class="pl-5 pr-5 mt-5">
+        <form id="frmModifier">
+            <div class="form-group">
+                <label class="">Marque</label>
+                @Html.TextBoxFor(m => m.Nom, new { @class = "form-control",@id="Nom" })
+            </div>
+            <button class="btn btn-primary btn-block">
+                Modfier
+            </button>
+        </form>
+    </div>
+</div>
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function(){
+            const id = window.location.href.split("idMarque=")[1];
+            $('#frmModifier').validate({
+                rules: {
+                    Nom: {
+                        required: true
+                    },
+                   
+                },
+                messages: {
+                    Nom: {
+                        required: "il faut saisire le nom "
+                    },
+                   
+                },
+                
+                submitHandler: function () {
+                    const objToSend = {
+                        idMarque: id,
+                        Nom: $("#Nom").val(),
+                    }
+
+                $.ajax({
+                    method: 'POST',
+                    url: '@Url.Action("ModifierMarque","Admin")',
+                    data: JSON.stringify(objToSend),
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    success: function (resp) {
+                        console.log(resp);
+                        Swal.fire({
+                            title: 'Alert',
+                            text: "Modification effectuee avec success ",
+                            icon: 'success',
+                            confirmButtonColor: 'var(--success)',
+                        });
+                    },
+                    error: function (resp) {
+                        console.log(resp);
+                        Swal.fire({
+                            title: 'Alert',
+                            text: res.responseJSON.Message,
+                            icon: 'error',
+                            confirmButtonColor: 'var(--danger)',
+                        });
+                    }
+                });
+                }
+            })
+        });
+    </script>
+}
+

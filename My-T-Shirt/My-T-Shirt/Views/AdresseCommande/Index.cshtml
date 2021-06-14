@@ -1,0 +1,232 @@
+﻿@model My_T_Shirt.ViewModel.AdresseCommande
+@*@model My_T_Shirt.Models.Solde*@
+@{
+    ViewBag.Title = "Adresse commande";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    label.error {
+        color: var(--danger);
+        margin-top: 3px;
+    }
+
+    .track-line {
+        height: 2px !important;
+        background-color: var(--primary);
+    }
+
+        .track-line.nn-track-line {
+            background-color: #f4f4f4;
+        }
+
+    .dot {
+        height: 35px;
+        width: 35px;
+        margin-left: 0px;
+        margin-right: 0px;
+        margin-top: 0px;
+        background-color: var(--primary);
+        border-radius: 50%;
+        display: inline-block;
+        position: relative
+    }
+
+    .-dot i {
+        font-size: 12px
+    }
+
+    .dot small {
+        position: absolute;
+        color: gray;
+        margin-top: 10px;
+        top: 100%;
+        width: 100%;
+    }
+
+    .dot.nn-dot {
+        background-color: #f4f4f4;
+    }
+</style>
+
+
+<div class="container mt-5">
+
+
+    <div class="row mb-5">
+        <div class="col-md-12 mb-5">
+
+            <div class="d-flex flex-row justify-content-between align-items-center align-content-center">
+                <span class="dot d-flex justify-content-center align-items-center">
+                    <i class="fa fa-check text-white"></i>
+                    <small>S'identifier</small>
+                </span>
+
+                <hr class="flex-fill track-line">
+
+                <span class="dot d-flex justify-content-center align-items-center nn-dot">
+                    <small>adresse commande</small>
+                </span>
+
+                <hr class="flex-fill track-line nn-track-line">
+                <span class="dot d-flex justify-content-center align-items-center nn-dot">
+                    <small>Valider la commande</small>
+                </span>
+            </div>
+        </div>
+    </div>
+    <hr class="mt-5 mb-5" />
+
+    <div class="row">
+        <div class="col-xl-8 col-lg-8  col-md-8 col-sm-12">
+            <div class="justify-content-center d-flex mt-2">
+                <h4 class="m-title">Saisire l'adresse du commande</h4>
+            </div>
+            @if (ViewBag.error != "")
+            {
+                <div class="alert alert-danger">
+                    <div class="justify-content-center d-flex">
+                        <h4>@ViewBag.error</h4>
+                    </div>
+                </div>
+            }
+
+            @using (Html.BeginForm("", "", FormMethod.Post, new { id = "frm-adresse" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                <label for="txt-pays">Pays</label>
+                @Html.TextBoxFor(m => m.pays, new { @autocomplete = "off", @class = "form-control",id="txt-pays" })
+            </div>
+            <div class="form-group">
+                <label for="txt-ville">Ville</label>
+                @Html.TextBoxFor(m => m.ville, new { @autocomplete = "off", @class = "form-control", id = "txt-ville" })
+            </div>
+            <div class="form-group">
+                <label for="txt-code-postal">Code postal</label>
+                @Html.TextBoxFor(m => m.codePostal, new { @autocomplete = "off", @class = "form-control", id = "txt-codePostal" })
+
+            </div>
+            <div class="form-group">
+                <label for="txt-adresse">Adresse</label>
+                @Html.TextAreaFor(m => m.adresse, new { @autocomplete = "off", @class = "form-control", id = "txt-adresse" })
+            </div>
+                @*<div class="form-group">
+                    @Html.TextBoxFor(m => m.IdProduit, new { @autocomplete = "off", @class = "form-control" })
+                </div>*@
+
+                <button class="btn btn-block btn-primary" type="submit">valider l'adresse</button>
+            }
+        </div>
+
+        <div class="col-xl-4 col-lg-4  col-md-4 col-sm-12 mt-2">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <div class="justify-content-between d-flex">
+                        <label>Nombre de produit :</label>
+                        <label id="lbl-nbr-prod"> 0</label>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <div class="justify-content-between d-flex">
+                        <label>Montant Total :</label>
+                        <label id="lbl-mt"><span>0</span>MAD</label>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <div class="alert alert-info p-2 mb-0">
+                        <div class="justify-content-center d-flex">
+                            <h5 class="mt-2">Livraison gratuit</h5>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function(){
+            const panier = JSON.parse(getCookie("Panier"));;
+            let nbr = 0;
+            let mt = 0;
+
+            $.each(panier, function (i, produit) {
+                nbr += produit.qte;
+                let t_prix = produit.prix;
+                mt += parseFloat(t_prix * produit.qte);
+            });
+
+            $("#lbl-nbr-prod").text(nbr);
+            $("#lbl-mt").find("span").text(mt);
+
+            $("#frm-adresse").validate({
+                rules: {
+                    "ville": {
+                        required: true,
+                    },
+                    "pays": {
+                        required: true,
+                    },
+                    "codePostal": {
+                        required: true,
+                        maxlength: 5,
+                        minlength: 5,
+                        number: true,
+                    },
+                    "adresse": {
+                        required: true,
+                    }
+                },
+                messages: {
+                    "ville": {
+                        required: "il faut saisire la ville",
+                    },
+                    "pays": {
+                        required: "il faut saisire le pays"
+                    },
+                    "codePostal": {
+                        required: "il faut saisire le code postal",
+                    },
+                    "adresse": {
+                        required: "il faut saisire l'adresse",
+                    }
+                },
+                submitHandler: function () {
+                    const adresse = {
+                        pays: $("#txt-pays").val(),
+                        ville: $("#txt-ville").val(),
+                        codePostal: $("#txt-codePostal").val(),
+                        adresse: $("#txt-adresse").val(),
+
+                    };
+
+                    @*$.ajax({
+                        method: "post",
+                        url: "@Url.Action("setAdresseCommande", "AdresseCommande")",
+                        data: JSON.stringify(adresse),
+                        contentType:'application/json',
+                        success: function (resp) {
+                            console.log(resp);
+                        },
+                        error: function (resp) {
+                            console.log(resp);
+                            Swal.fire(
+                                'Alert',
+                                "Erreur du serveur",
+                                'info'
+                            );
+                        }
+                    })*@
+
+                    setCookie("AdresseCommande", JSON.stringify(adresse), 0.1);
+                    window.location.href = "/ValiderCommande";
+                },
+
+            });
+        });
+    </script>
+}
+
